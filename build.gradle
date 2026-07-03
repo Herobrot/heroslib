@@ -136,7 +136,7 @@ publishMods {
         client = true
         server = true
         requires("cloth-config")
-        changelogType = "text"
+        changelogType = "html"
         displayName = jar.archiveFileName.get()
     }
     modrinth {
