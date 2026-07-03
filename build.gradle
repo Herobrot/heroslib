@@ -151,6 +151,7 @@ publishMods {
         repository = "Herobrot/${mod_id}"
         commitish = "1.21"
         additionalFiles.from(tasks.named("sourcesJar"))
-        displayName = "${mod_name} ${mod_id}+${minecraft_version}"
+        displayName = "${mod_name} ${mod_version}+${minecraft_version}"
+        tagName="${mod_version}+${minecraft_version}"
     }
 }
