@@ -1,0 +1,16 @@
+package com.herobrot.heroslib.client.tab;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import java.util.function.Supplier;
+
+public record TabDefinition(ResourceLocation id, ResourceLocation icon, Component tooltip,
+                            Class<? extends Screen> targetScreen,
+                            Supplier<Screen> screenSupplier, int priority) {
+
+    public boolean shouldShow(Minecraft client) {
+        return true;
+    }
+}

@@ -1,0 +1,13 @@
+{
+  "itemGroup.heroslib": "Example Mod Tab",
+  "block.heroslib.example_block": "Example Block",
+  "item.heroslib.example_item": "Example Item",
+
+  "heroslib.configuration.title": "Hero's Lib Configs",
+  "heroslib.configuration.section.heroslib.common.toml": "Hero's Lib Configs",
+  "heroslib.configuration.section.heroslib.common.toml.title": "Hero's Lib Configs",
+  "heroslib.configuration.items": "Item List",
+  "heroslib.configuration.logDirtBlock": "Log Dirt Block",
+  "heroslib.configuration.magicNumberIntroduction": "Magic Number Text",
+  "heroslib.configuration.magicNumber": "Magic Number"
+}
