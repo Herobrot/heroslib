@@ -18,11 +18,6 @@ sourceSets.main.resources {
 }
 repositories {
     maven { url = "https://maven.shedaniel.me/" }
-    maven { url = "https://maven.terraformersmc.com/" }
-    mavenCentral()
-    flatDir(
-            dirs: 'libs'
-    )
 }
 base {
     archivesName = mod_id
