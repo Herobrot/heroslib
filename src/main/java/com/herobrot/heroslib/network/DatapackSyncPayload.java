@@ -12,10 +12,11 @@ public record DatapackSyncPayload(String modId, String packetIdentifier, String 
 
     public static final Type<DatapackSyncPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("heroslib", "datapack_sync"));
 
+    // Aplicado el cambio crítico: Límites personalizados para evitar la desconexión del cliente por JSONs masivos
     public static final StreamCodec<FriendlyByteBuf, DatapackSyncPayload> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.STRING_UTF8, DatapackSyncPayload::modId,
-            ByteBufCodecs.STRING_UTF8, DatapackSyncPayload::packetIdentifier,
-            ByteBufCodecs.STRING_UTF8, DatapackSyncPayload::jsonPayload, // El JSON gigante con todos los datos
+            ByteBufCodecs.stringUtf8(256), DatapackSyncPayload::modId,
+            ByteBufCodecs.stringUtf8(256), DatapackSyncPayload::packetIdentifier,
+            ByteBufCodecs.stringUtf8(Integer.MAX_VALUE), DatapackSyncPayload::jsonPayload, // Límite abierto para Datapacks
             DatapackSyncPayload::new
     );
 
