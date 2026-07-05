@@ -10,4 +10,8 @@ public interface ITabbedScreen {
     default Class<? extends Screen> getParentScreenClass() {
         return null;
     }
+
+    // Coordenadas base donde inicia tu interfaz gráfica
+    int getGuiLeft();
+    int getGuiTop();
 }

@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 
 public record TabDefinition(ResourceLocation id, ItemStack icon, Component tooltip,
                             Class<? extends Screen> targetScreen,
-                            Supplier<Screen> screenSupplier, int priority) {
+                            Supplier<Screen> screenSupplier, int priority, boolean needsMouseFix) {
 
     public boolean shouldShow(Minecraft client) {
         return true;

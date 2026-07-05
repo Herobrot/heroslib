@@ -14,14 +14,14 @@ public class TabRegistry {
     private static final Map<Class<? extends Screen>, List<TabDefinition>> OTHER_TABS = new HashMap<>();
 
     static {
-        // La pestaña del inventario vanilla ahora usa ItemStack(Items.CHEST)
         registerInventoryTab(new TabDefinition(
                 ResourceLocation.withDefaultNamespace("inventory"),
                 new ItemStack(Items.CHEST),
                 Component.translatable("gui.heroslib.tab.inventory"),
                 InventoryScreen.class,
                 null,
-                0
+                0,
+                false
         ));
     }
 

@@ -6,7 +6,8 @@ import com.herobrot.heroslib.client.widget.TabButtonWidget;
 import com.herobrot.heroslib.mixin.MouseHandlerAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -27,45 +28,60 @@ public class TabInjectionHandler {
         Screen screen = event.getScreen();
         Minecraft client = Minecraft.getInstance();
 
-        if (screen instanceof AbstractContainerScreen<?> containerScreen) {
+        // FILTRO: Ignorar el Inventario Creativo para evitar superposiciones
+        if (screen instanceof CreativeModeInventoryScreen) {
+            return;
+        }
 
-            // 1. Integración del Mixin: Restaurar posición del cursor
+        int guiLeft = 0;
+        int guiTop = 0;
+        boolean isValidScreen = false;
+        List<TabDefinition> activeTabs = null;
+
+        // Caso 1: Pantallas nativas de Minecraft (AbstractContainerScreen)
+        if (screen instanceof InventoryScreen containerScreen) {
+            guiLeft = containerScreen.getGuiLeft();
+            guiTop = containerScreen.getGuiTop();
+            isValidScreen = true;
+            activeTabs = TabRegistry.getInventoryTabs();
+        }
+        // Caso 2: Pantallas de tus Mods que implementan ITabbedScreen
+        else if (screen instanceof ITabbedScreen tabbedScreen) {
+            guiLeft = tabbedScreen.getGuiLeft();
+            guiTop = tabbedScreen.getGuiTop();
+            isValidScreen = true;
+            // Preservamos la lógica de agrupamiento (ej. si la pestaña padre es el Yunke, trae las de Yunque)
+            activeTabs = tabbedScreen.getParentScreenClass() != null
+                    ? TabRegistry.getTabsFor(tabbedScreen.getParentScreenClass())
+                    : TabRegistry.getInventoryTabs();
+        }
+
+        // Renderizado
+        if (isValidScreen && activeTabs != null && !activeTabs.isEmpty()) {
+
+            // Fix del ratón de TieredNeo
             if (expectingTabChange) {
                 expectingTabChange = false;
                 GLFW.glfwSetCursorPos(client.getWindow().getWindow(), savedMouseX, savedMouseY);
-
-                // Conexión del Accessor que estaba en desuso
                 MouseHandlerAccessor accessor = (MouseHandlerAccessor) client.mouseHandler;
                 accessor.setXpos(savedMouseX);
                 accessor.setYpos(savedMouseY);
             }
 
-            // 2. Determinar qué pestañas renderizar (Lógica LibZ)
-            List<TabDefinition> activeTabs;
-            if (screen instanceof ITabbedScreen tabbedScreen && tabbedScreen.getParentScreenClass() != null) {
-                activeTabs = TabRegistry.getTabsFor(tabbedScreen.getParentScreenClass());
-            } else {
-                activeTabs = TabRegistry.getInventoryTabs();
-            }
-
-            if (activeTabs.isEmpty()) return;
-
-            // 3. Coordenadas y Renderizado
-            int xPos = containerScreen.getGuiLeft();
-            int topPos = containerScreen.getGuiTop();
             boolean isFirstTab = true;
+            int xPos = guiLeft;
+            int topPos = guiTop - 28; // Altura exacta para sentarse sobre el borde
 
             for (TabDefinition tab : activeTabs) {
-                if (tab.shouldShow(client)) { // Uso de la clase TabDefinition
+                if (tab.shouldShow(client)) {
                     boolean isSelected = tab.targetScreen().isAssignableFrom(screen.getClass());
 
-                    // Si está seleccionada, la pestaña sube un poco más para resaltar
-                    int tabY = topPos - (isSelected ? 28 : 25);
+                    // La seleccionada sube ligeramente (2 píxeles) y su base no se oculta
+                    int tabY = isSelected ? topPos - 2 : topPos;
 
-                    // Pasamos toda la instancia de 'tab' al widget para simplificar
                     event.addListener(new TabButtonWidget(xPos, tabY, isFirstTab, isSelected, tab, () -> handleTabClick(tab, client)));
 
-                    xPos += 29; // Avanza en X para la siguiente pestaña
+                    xPos += 29;
                     isFirstTab = false;
                 }
             }
@@ -73,15 +89,21 @@ public class TabInjectionHandler {
     }
 
     private static void handleTabClick(TabDefinition tab, Minecraft mc) {
-        savedMouseX = mc.mouseHandler.xpos();
-        savedMouseY = mc.mouseHandler.ypos();
-        expectingTabChange = true;
+        // Solo aplicar el "Hack de TieredNeo" si la pestaña hace llamadas al servidor
+        if (tab.needsMouseFix()) {
+            savedMouseX = mc.mouseHandler.xpos();
+            savedMouseY = mc.mouseHandler.ypos();
+            expectingTabChange = true;
+        }
 
-        if (tab.id().getPath().equals("inventory")) {
-            assert mc.player != null;
-            mc.player.closeContainer();
-        } else if (tab.screenSupplier() != null) {
+        // Transición de pantalla nativa
+        if (tab.screenSupplier() != null) {
             mc.setScreen(tab.screenSupplier().get());
+        } else {
+            if (mc.player != null) {
+                // Abre el inventario del cliente (Vanilla maneja el ratón perfectamente aquí)
+                mc.setScreen(new InventoryScreen(mc.player));
+            }
         }
     }
 }
