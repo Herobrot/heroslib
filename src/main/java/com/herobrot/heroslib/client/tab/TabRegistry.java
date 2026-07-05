@@ -16,7 +16,7 @@ public class TabRegistry {
         // La pestaña del inventario vanilla siempre existe y tiene prioridad 0
         registerInventoryTab(new TabDefinition(
                 ResourceLocation.withDefaultNamespace("inventory"),
-                ResourceLocation.withDefaultNamespace("textures/item/chest.png"),
+                ResourceLocation.withDefaultNamespace("textures/gui/item_picked_up.png"),
                 Component.translatable("gui.heroslib.tab.inventory"),
                 InventoryScreen.class,
                 null,
