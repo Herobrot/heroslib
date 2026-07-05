@@ -4,19 +4,20 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 import java.util.*;
 
 public class TabRegistry {
-    // Replicando la estructura de LibZ para facilitar el porteo
     private static final List<TabDefinition> INVENTORY_TABS = new ArrayList<>();
     private static final Map<Class<? extends Screen>, List<TabDefinition>> OTHER_TABS = new HashMap<>();
 
     static {
-        // La pestaña del inventario vanilla siempre existe y tiene prioridad 0
+        // La pestaña del inventario vanilla ahora usa ItemStack(Items.CHEST)
         registerInventoryTab(new TabDefinition(
                 ResourceLocation.withDefaultNamespace("inventory"),
-                ResourceLocation.withDefaultNamespace("textures/gui/item_picked_up.png"),
+                new ItemStack(Items.CHEST),
                 Component.translatable("gui.heroslib.tab.inventory"),
                 InventoryScreen.class,
                 null,
