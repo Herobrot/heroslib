@@ -1,5 +1,6 @@
 package com.herobrot.heroslib;
 
+import com.herobrot.heroslib.config.HerosConfigManager;
 import com.herobrot.heroslib.network.GenericConfigSyncPayload;
 import com.herobrot.heroslib.network.PayloadRegistryManager;
 import net.minecraft.network.chat.Component;
@@ -22,7 +23,7 @@ public class HerosLib {
                 GenericConfigSyncPayload.TYPE,
                 GenericConfigSyncPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() ->
-                        LOGGER.info("Configuración recibida para el mod: {}", payload.modId())),
+                        HerosConfigManager.handleClientSync(payload.modId(), payload.jsonConfig())),
                 (payload, context) -> context.enqueueWork(() -> {
                     if (context.player() instanceof ServerPlayer player) {
                         player.sendSystemMessage(Component.literal("Config sync not supported from client to server."));
