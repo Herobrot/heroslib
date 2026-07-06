@@ -26,20 +26,31 @@ public class TabButtonWidget extends AbstractButton {
 
     @Override
     public void renderWidget(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        // 1. Fondo de pestaña al ras del inventario
-        ResourceLocation bgSprite = this.isSelected ? TAB_SELECTED : TAB_UNSELECTED;
-        graphics.blitSprite(bgSprite, this.getX(), this.getY(), this.width, this.height);
+        // El fondo de las pestañas NO seleccionadas ya se dibujó en ScreenEvent.Render.Pre,
+        // ANTES del panel, para que su borde quede "detrás" del marco del inventario.
+        if (this.isSelected) {
+            renderTabBackground(graphics); // Se dibuja aquí (fase normal) para quedar POR ENCIMA del panel
+        }
 
-        // 2. Ítem rendering sin anomalías de profundidad
         graphics.renderFakeItem(this.icon, this.getX() + 6, this.getY() + 9);
 
-        // 3. Tooltip al frente de todos los elementos
         if (this.isHovered()) {
             graphics.pose().pushPose();
             graphics.pose().translate(0, 0, 400);
             graphics.renderTooltip(Minecraft.getInstance().font, this.getMessage(), mouseX, mouseY);
             graphics.pose().popPose();
         }
+    }
+
+    public void renderTabBackground(GuiGraphics graphics) {
+        ResourceLocation bgSprite = this.isSelected ? TAB_SELECTED : TAB_UNSELECTED;
+        graphics.blitSprite(bgSprite, this.getX(), this.getY(), this.width, this.height);
+    }
+
+    // Usado por TabInjectionHandler en la fase Pre, cuando aún no existe una instancia del widget en ese frame
+    public static void drawBackgroundStatic(GuiGraphics graphics, int x, int y, boolean selected) {
+        ResourceLocation bg = selected ? TAB_SELECTED : TAB_UNSELECTED;
+        graphics.blitSprite(bg, x, y, 28, 32);
     }
 
     @Override
