@@ -10,11 +10,12 @@ import net.minecraft.world.item.Items;
 import java.util.*;
 
 public class TabRegistry {
-    private static final List<TabDefinition> INVENTORY_TABS = new ArrayList<>();
-    private static final Map<Class<? extends Screen>, List<TabDefinition>> OTHER_TABS = new HashMap<>();
+    // UNIFICACIÓN: Un solo mapa para todas las pestañas, agrupadas por su pantalla padre
+    private static final Map<Class<? extends Screen>, List<TabDefinition>> TABS = new HashMap<>();
 
     static {
-        registerInventoryTab(new TabDefinition(
+        // La pestaña de vainilla se registra bajo la llave de InventoryScreen.class
+        registerTab(InventoryScreen.class, new TabDefinition(
                 ResourceLocation.withDefaultNamespace("inventory"),
                 new ItemStack(Items.CHEST),
                 Component.translatable("gui.heroslib.tab.inventory"),
@@ -25,24 +26,16 @@ public class TabRegistry {
         ));
     }
 
+    public static void registerTab(Class<? extends Screen> parentClass, TabDefinition tab) {
+        TABS.computeIfAbsent(parentClass, k -> new ArrayList<>()).add(tab);
+        TABS.get(parentClass).sort(Comparator.comparingInt(TabDefinition::priority));
+    }
+
     public static void registerInventoryTab(TabDefinition tab) {
-        if (INVENTORY_TABS.stream().noneMatch(t -> t.id().equals(tab.id()))) {
-            INVENTORY_TABS.add(tab);
-            INVENTORY_TABS.sort(Comparator.comparingInt(TabDefinition::priority));
-        }
-    }
-
-    @SuppressWarnings("unused")
-    public static void registerOtherTab(TabDefinition tab, Class<? extends Screen> parentClass) {
-        OTHER_TABS.computeIfAbsent(parentClass, k -> new ArrayList<>()).add(tab);
-        OTHER_TABS.get(parentClass).sort(Comparator.comparingInt(TabDefinition::priority));
-    }
-
-    public static List<TabDefinition> getInventoryTabs() {
-        return Collections.unmodifiableList(INVENTORY_TABS);
+        registerTab(InventoryScreen.class, tab);
     }
 
     public static List<TabDefinition> getTabsFor(Class<? extends Screen> screenClass) {
-        return OTHER_TABS.getOrDefault(screenClass, Collections.emptyList());
+        return TABS.getOrDefault(screenClass, Collections.emptyList());
     }
 }

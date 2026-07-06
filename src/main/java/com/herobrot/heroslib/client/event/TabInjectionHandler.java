@@ -28,7 +28,6 @@ public class TabInjectionHandler {
         Screen screen = event.getScreen();
         Minecraft client = Minecraft.getInstance();
 
-        // FILTRO: Ignorar el Inventario Creativo para evitar superposiciones
         if (screen instanceof CreativeModeInventoryScreen) {
             return;
         }
@@ -36,30 +35,27 @@ public class TabInjectionHandler {
         int guiLeft = 0;
         int guiTop = 0;
         boolean isValidScreen = false;
-        List<TabDefinition> activeTabs = null;
+        Class<? extends Screen> parentClass = null;
 
-        // Caso 1: Pantallas nativas de Minecraft (AbstractContainerScreen)
+        // 1. Extraer coordenadas y la clase padre
         if (screen instanceof InventoryScreen containerScreen) {
             guiLeft = containerScreen.getGuiLeft();
             guiTop = containerScreen.getGuiTop();
             isValidScreen = true;
-            activeTabs = TabRegistry.getInventoryTabs();
-        }
-        // Caso 2: Pantallas de tus Mods que implementan ITabbedScreen
-        else if (screen instanceof ITabbedScreen tabbedScreen) {
+            parentClass = InventoryScreen.class;
+        } else if (screen instanceof ITabbedScreen tabbedScreen) {
             guiLeft = tabbedScreen.getGuiLeft();
             guiTop = tabbedScreen.getGuiTop();
             isValidScreen = true;
-            // Preservamos la lógica de agrupamiento (ej. si la pestaña padre es el Yunke, trae las de Yunque)
-            activeTabs = tabbedScreen.getParentScreenClass() != null
-                    ? TabRegistry.getTabsFor(tabbedScreen.getParentScreenClass())
-                    : TabRegistry.getInventoryTabs();
+            parentClass = tabbedScreen.getParentScreenClass();
         }
 
-        // Renderizado
-        if (isValidScreen && activeTabs != null && !activeTabs.isEmpty()) {
+        if (!isValidScreen || parentClass == null) return;
 
-            // Fix del ratón de TieredNeo
+        // 2. Obtener lista unificada
+        List<TabDefinition> activeTabs = TabRegistry.getTabsFor(parentClass);
+
+        if (!activeTabs.isEmpty()) {
             if (expectingTabChange) {
                 expectingTabChange = false;
                 GLFW.glfwSetCursorPos(client.getWindow().getWindow(), savedMouseX, savedMouseY);
@@ -70,13 +66,13 @@ public class TabInjectionHandler {
 
             boolean isFirstTab = true;
             int xPos = guiLeft;
-            int topPos = guiTop - 28; // Altura exacta para sentarse sobre el borde
+            int topPos = guiTop - 28; // Las pestañas descansan sobre el borde de la GUI
 
             for (TabDefinition tab : activeTabs) {
                 if (tab.shouldShow(client)) {
                     boolean isSelected = tab.targetScreen().isAssignableFrom(screen.getClass());
 
-                    // La seleccionada sube ligeramente (2 píxeles) y su base no se oculta
+                    // Si está seleccionada sube ligeramente; si no, queda al ras del borde
                     int tabY = isSelected ? topPos - 2 : topPos;
 
                     event.addListener(new TabButtonWidget(xPos, tabY, isFirstTab, isSelected, tab, () -> handleTabClick(tab, client)));
@@ -89,19 +85,16 @@ public class TabInjectionHandler {
     }
 
     private static void handleTabClick(TabDefinition tab, Minecraft mc) {
-        // Solo aplicar el "Hack de TieredNeo" si la pestaña hace llamadas al servidor
         if (tab.needsMouseFix()) {
             savedMouseX = mc.mouseHandler.xpos();
             savedMouseY = mc.mouseHandler.ypos();
             expectingTabChange = true;
         }
 
-        // Transición de pantalla nativa
         if (tab.screenSupplier() != null) {
             mc.setScreen(tab.screenSupplier().get());
         } else {
             if (mc.player != null) {
-                // Abre el inventario del cliente (Vanilla maneja el ratón perfectamente aquí)
                 mc.setScreen(new InventoryScreen(mc.player));
             }
         }

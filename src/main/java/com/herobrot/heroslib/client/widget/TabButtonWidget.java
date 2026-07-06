@@ -26,18 +26,14 @@ public class TabButtonWidget extends AbstractButton {
 
     @Override
     public void renderWidget(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        graphics.pose().pushPose();
-
-        if (!this.isSelected) {
-            graphics.pose().translate(0, 0, -100);
-        }
-
+        // 1. Fondo de pestaña al ras del inventario
         ResourceLocation bgSprite = this.isSelected ? TAB_SELECTED : TAB_UNSELECTED;
         graphics.blitSprite(bgSprite, this.getX(), this.getY(), this.width, this.height);
 
+        // 2. Ítem rendering sin anomalías de profundidad
         graphics.renderFakeItem(this.icon, this.getX() + 6, this.getY() + 9);
-        graphics.pose().popPose();
 
+        // 3. Tooltip al frente de todos los elementos
         if (this.isHovered()) {
             graphics.pose().pushPose();
             graphics.pose().translate(0, 0, 400);
