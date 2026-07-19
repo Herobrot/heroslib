@@ -9,6 +9,6 @@ public class HerosLibClient {
 
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
-        HerosLib.LOGGER.info("HerosLib Client Setup: Cargando gestor de pestañas e inyectores UI.");
+        HerosLib.LOGGER.info("[HerosLib] Client Setup: Cargando gestor de pestañas e inyectores UI.");
     }
 }

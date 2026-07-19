@@ -28,7 +28,7 @@ public abstract class AbstractDataLoader extends SimpleJsonResourceReloadListene
 
     @Override
     protected void apply(@NotNull Map<ResourceLocation, JsonElement> objectMap, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profiler) {
-        HerosLib.LOGGER.info("Cargando datos desde la carpeta de datapacks: {}", this.folderName);
+        HerosLib.LOGGER.info("[HerosLib]: Cargando datos desde la carpeta de datapacks: {}", this.folderName);
 
         // Limpiamos los mapas locales del mod antes de inyectar los nuevos datos
         this.clearLocalData();

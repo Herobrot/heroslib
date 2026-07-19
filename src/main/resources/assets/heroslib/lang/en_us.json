@@ -1,3 +1,4 @@
 {
-  "gui.heroslib.tab.inventory": "Inventory"
+  "gui.heroslib.tab.inventory": "Inventory",
+  "message.heroslib.config_sync_unsupported": "Config sync not supported from client to server."
 }

@@ -5,15 +5,20 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class HerosConfigManager {
+    // Almacena las acciones que cada mod quiere ejecutar cuando reciba su JSON
     private static final Map<String, Consumer<String>> CLIENT_HANDLERS = new HashMap<>();
 
     /**
-     * Registra una acción a ejecutar en el cliente cuando llegue el JSON de configuración de un mod específico.
+     * Registra un manejador para el mod.
+     * ADVERTENCIA: Los mods deben llamar a este método SOLO desde su inicialización de Cliente (Dist.CLIENT).
      */
     public static void registerClientSync(String modId, Consumer<String> jsonConsumer) {
         CLIENT_HANDLERS.put(modId, jsonConsumer);
     }
 
+    /**
+     * Se ejecuta de forma segura en el Hilo Principal gracias al enqueueWork de HerosLib.java.
+     */
     public static void handleClientSync(String modId, String jsonPayload) {
         if (CLIENT_HANDLERS.containsKey(modId)) {
             CLIENT_HANDLERS.get(modId).accept(jsonPayload);

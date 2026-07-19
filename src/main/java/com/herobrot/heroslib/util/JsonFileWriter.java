@@ -67,7 +67,7 @@ public class JsonFileWriter {
                     } catch (Exception e) {
                         // FIX: ya no se ignora en silencio; si el JSON está corrupto, se avisa
                         // antes de sobrescribirlo con un objeto vacío.
-                        HerosLib.LOGGER.warn("HerosLib: No se pudo parsear {} existente, se reconstruirá. Detalle: {}", fileName, e.getMessage());
+                        HerosLib.LOGGER.warn("[HerosLib]: No se pudo parsear {} existente, se reconstruirá. Detalle: {}", fileName, e.getMessage());
                     }
                 }
 
@@ -87,10 +87,10 @@ public class JsonFileWriter {
 
             try (FileWriter writer = new FileWriter(file, false)) {
                 PRETTY_GSON.toJson(json, writer);
-                HerosLib.LOGGER.info("HerosLib: Archivo JSON actualizado en {}", file.getAbsolutePath());
+                HerosLib.LOGGER.info("[HerosLib]: Archivo JSON actualizado en {}", file.getAbsolutePath());
             }
         } catch (IOException e) {
-            HerosLib.LOGGER.error("HerosLib: Fallo al escribir {}. Detalle: {}", fileName, e.getMessage());
+            HerosLib.LOGGER.error("[HerosLib]: Fallo al escribir {}. Detalle: {}", fileName, e.getMessage());
         }
     }
 }

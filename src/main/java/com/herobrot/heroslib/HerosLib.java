@@ -26,7 +26,7 @@ public class HerosLib {
                         HerosConfigManager.handleClientSync(payload.modId(), payload.jsonConfig())),
                 (payload, context) -> context.enqueueWork(() -> {
                     if (context.player() instanceof ServerPlayer player) {
-                        player.sendSystemMessage(Component.literal("Config sync not supported from client to server."));
+                        player.sendSystemMessage(Component.translatable("message.heroslib.config_sync_unsupported"));
                     }
                 })
         );
