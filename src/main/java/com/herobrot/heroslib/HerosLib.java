@@ -3,6 +3,7 @@ package com.herobrot.heroslib;
 import com.herobrot.heroslib.config.HerosConfigManager;
 import com.herobrot.heroslib.network.GenericConfigSyncPayload;
 import com.herobrot.heroslib.network.PayloadRegistryManager;
+import com.herobrot.heroslib.util.ModUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.IEventBus;
@@ -20,6 +21,7 @@ public class HerosLib {
     public HerosLib(IEventBus modEventBus, ModContainer modContainer) {
         PayloadRegistryManager.registerBidirectional(
                 MODID,
+                ModUtils.getModVersion(MODID),
                 GenericConfigSyncPayload.TYPE,
                 GenericConfigSyncPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() ->
