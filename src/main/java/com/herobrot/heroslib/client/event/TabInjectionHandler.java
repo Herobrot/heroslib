@@ -13,6 +13,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ScreenEvent;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
@@ -24,7 +25,8 @@ public class TabInjectionHandler {
     private static double savedMouseX = 0;
     private static double savedMouseY = 0;
 
-    private record ScreenTabContext(int guiLeft, int guiTop, List<TabDefinition> tabs) {}
+    // AÑADIDO: parentClass para saber cuál es la pestaña "Home" de este grupo
+    private record ScreenTabContext(int guiLeft, int guiTop, Class<? extends Screen> parentClass, List<TabDefinition> tabs) {}
 
     private static ScreenTabContext resolveContext(Screen screen) {
         if (screen instanceof CreativeModeInventoryScreen) return null;
@@ -47,12 +49,9 @@ public class TabInjectionHandler {
         }
 
         List<TabDefinition> tabs = TabRegistry.getTabsFor(parentClass);
-        return tabs.isEmpty() ? null : new ScreenTabContext(guiLeft, guiTop, tabs);
+        return tabs.isEmpty() ? null : new ScreenTabContext(guiLeft, guiTop, parentClass, tabs);
     }
 
-    // NUEVO: se dispara ANTES de que la pantalla dibuje su propio panel (renderBg).
-    // Aquí solo pintamos el fondo de las pestañas NO seleccionadas, para que el
-    // borde del panel se dibuje encima y las "trague" visualmente.
     @SubscribeEvent
     public static void onScreenRenderPre(ScreenEvent.Render.Pre event) {
         Screen screen = event.getScreen();
@@ -105,6 +104,58 @@ public class TabInjectionHandler {
                 isFirstTab = false;
             }
         }
+    }
+
+    // Manejador de teclado global para pestañas
+    @SubscribeEvent
+    public static void onScreenKeyPressed(ScreenEvent.KeyPressed.Pre event) {
+        Screen screen = event.getScreen();
+        Minecraft client = Minecraft.getInstance();
+
+        ScreenTabContext ctx = resolveContext(screen);
+        if (ctx == null) return;
+
+        int keyCode = event.getKeyCode();
+        int scanCode = event.getScanCode();
+
+        // 1. Tecla de inventario (E) -> volver a la home del grupo
+        if (client.options.keyInventory.matches(keyCode, scanCode)) {
+            TabDefinition homeTab = findHomeTab(ctx);
+            if (homeTab != null && !homeTab.targetScreen().isAssignableFrom(screen.getClass())) {
+                handleTabClick(homeTab, client);
+                event.setCanceled(true); // Cancelamos para que el juego no cierre la pantalla
+            }
+            // Si ya estamos en la home, no cancelamos. Dejamos que Vanilla cierre el inventario.
+            return;
+        }
+
+        // 2. Atajo dedicado de alguna pestaña del grupo (Ej. "K" para Skills)
+        for (TabDefinition tab : ctx.tabs()) {
+            if (tab.keyMapping() == null || !tab.keyMapping().matches(keyCode, scanCode)) continue;
+            if (!tab.shouldShow(client)) continue;
+
+            boolean isSelected = tab.targetScreen().isAssignableFrom(screen.getClass());
+
+            if (isSelected) {
+                // OPCIÓN 1 (Toggle-Close): Si ya estamos en esta pestaña, la tecla la cierra.
+                screen.onClose();
+            } else {
+                // Si no, cambiamos a ella
+                handleTabClick(tab, client);
+            }
+
+            event.setCanceled(true);
+            return;
+        }
+    }
+
+    @Nullable
+    private static TabDefinition findHomeTab(ScreenTabContext ctx) {
+        // Gracias a que ahora tenemos parentClass en el contexto, buscar la home es 100% preciso
+        return ctx.tabs().stream()
+                .filter(tab -> tab.targetScreen() == ctx.parentClass())
+                .findFirst()
+                .orElse(null);
     }
 
     private static void handleTabClick(TabDefinition tab, Minecraft mc) {
