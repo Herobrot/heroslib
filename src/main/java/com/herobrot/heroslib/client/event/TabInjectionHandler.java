@@ -106,7 +106,6 @@ public class TabInjectionHandler {
         }
     }
 
-    // Manejador de teclado global para pestañas
     @SubscribeEvent
     public static void onScreenKeyPressed(ScreenEvent.KeyPressed.Pre event) {
         Screen screen = event.getScreen();
@@ -118,40 +117,61 @@ public class TabInjectionHandler {
         int keyCode = event.getKeyCode();
         int scanCode = event.getScanCode();
 
-        // 1. Tecla de inventario (E) -> volver a la home del grupo
+        // Identificar en qué pestaña estamos actualmente
+        TabDefinition currentTab = ctx.tabs().stream()
+                .filter(tab -> tab.targetScreen().isAssignableFrom(screen.getClass()))
+                .findFirst()
+                .orElse(null);
+
+        // 1. Tecla de inventario (E)
         if (client.options.keyInventory.matches(keyCode, scanCode)) {
-            TabDefinition homeTab = findHomeTab(ctx);
-            if (homeTab != null && !homeTab.targetScreen().isAssignableFrom(screen.getClass())) {
-                handleTabClick(homeTab, client);
-                event.setCanceled(true); // Cancelamos para que el juego no cierre la pantalla
+            boolean alreadyHome = currentTab != null && currentTab.targetScreen() == ctx.parentClass();
+            if (alreadyHome) {
+                // Ya estamos en la home: dejamos que Vanilla la cierre de forma nativa.
+                return;
             }
-            // Si ya estamos en la home, no cancelamos. Dejamos que Vanilla cierre el inventario.
+
+            if (currentTab != null && currentTab.canSwitchByKey()) {
+                TabDefinition homeTab = findHomeTab(ctx);
+                if (homeTab != null) {
+                    handleTabClick(homeTab, client);
+                    event.setCanceled(true);
+                    return;
+                }
+            }
+
+            // Comportamiento seguro: solo cerrar.
+            screen.onClose();
+            event.setCanceled(true);
             return;
         }
 
-        // 2. Atajo dedicado de alguna pestaña del grupo (Ej. "K" para Skills)
+        // 2. Atajo dedicado de alguna pestaña del grupo (Ej. "K")
         for (TabDefinition tab : ctx.tabs()) {
             if (tab.keyMapping() == null || !tab.keyMapping().matches(keyCode, scanCode)) continue;
             if (!tab.shouldShow(client)) continue;
 
-            boolean isSelected = tab.targetScreen().isAssignableFrom(screen.getClass());
+            boolean isSelected = tab == currentTab;
 
             if (isSelected) {
-                // OPCIÓN 1 (Toggle-Close): Si ya estamos en esta pestaña, la tecla la cierra.
+                // Si la presionamos estando en su propia pantalla -> Cerrar
                 screen.onClose();
-            } else {
-                // Si no, cambiamos a ella
+                event.setCanceled(true);
+            } else if (tab.canSwitchByKey()) {
+                // Si estamos en otra pantalla y permite cambio -> Cambiar de pestaña
                 handleTabClick(tab, client);
+                event.setCanceled(true);
+            } else {
+                // Si no permite cambio, actúa como un botón genérico de cierre
+                screen.onClose();
+                event.setCanceled(true);
             }
-
-            event.setCanceled(true);
             return;
         }
     }
 
     @Nullable
     private static TabDefinition findHomeTab(ScreenTabContext ctx) {
-        // Gracias a que ahora tenemos parentClass en el contexto, buscar la home es 100% preciso
         return ctx.tabs().stream()
                 .filter(tab -> tab.targetScreen() == ctx.parentClass())
                 .findFirst()
