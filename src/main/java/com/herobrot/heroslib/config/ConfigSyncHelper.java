@@ -73,7 +73,6 @@ public class ConfigSyncHelper {
         return switch (value) {
             case Integer i -> (int) clamped;
             case Long l -> clamped;
-            case Short i -> (short) clamped;
             default -> value;
         };
 
