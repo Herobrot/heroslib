@@ -20,17 +20,15 @@ import java.util.List;
 
 @EventBusSubscriber(modid = "heroslib", value = Dist.CLIENT)
 public class TabInjectionHandler {
-
     private static boolean expectingTabChange = false;
     private static double savedMouseX = 0;
     private static double savedMouseY = 0;
 
-    // AÑADIDO: parentClass para saber cuál es la pestaña "Home" de este grupo
-    private record ScreenTabContext(int guiLeft, int guiTop, Class<? extends Screen> parentClass, List<TabDefinition> tabs) {}
+    private record ScreenTabContext(int guiLeft, int guiTop, Class<? extends Screen> parentClass,
+                                    List<TabDefinition> tabs) {}
 
     private static ScreenTabContext resolveContext(Screen screen) {
         if (screen instanceof CreativeModeInventoryScreen) return null;
-
         int guiLeft;
         int guiTop;
         Class<? extends Screen> parentClass;
@@ -44,9 +42,8 @@ public class TabInjectionHandler {
             guiTop = tabbedScreen.getGuiTop();
             parentClass = tabbedScreen.getParentScreenClass();
             if (parentClass == null) return null;
-        } else {
+        } else
             return null;
-        }
 
         List<TabDefinition> tabs = TabRegistry.getTabsFor(parentClass);
         return tabs.isEmpty() ? null : new ScreenTabContext(guiLeft, guiTop, parentClass, tabs);
@@ -57,18 +54,14 @@ public class TabInjectionHandler {
         Screen screen = event.getScreen();
         ScreenTabContext ctx = resolveContext(screen);
         if (ctx == null) return;
-
         GuiGraphics graphics = event.getGuiGraphics();
         int xPos = ctx.guiLeft();
         int topPos = ctx.guiTop() - 28;
-
         for (TabDefinition tab : ctx.tabs()) {
             if (!tab.shouldShow(Minecraft.getInstance())) continue;
-
             boolean isSelected = tab.targetScreen().isAssignableFrom(screen.getClass());
-            if (!isSelected) {
+            if (!isSelected)
                 TabButtonWidget.drawBackgroundStatic(graphics, xPos, topPos, false);
-            }
             xPos += 29;
         }
     }
@@ -77,10 +70,8 @@ public class TabInjectionHandler {
     public static void onScreenInit(ScreenEvent.Init.Post event) {
         Screen screen = event.getScreen();
         Minecraft client = Minecraft.getInstance();
-
         ScreenTabContext ctx = resolveContext(screen);
         if (ctx == null) return;
-
         if (expectingTabChange) {
             expectingTabChange = false;
             GLFW.glfwSetCursorPos(client.getWindow().getWindow(), savedMouseX, savedMouseY);
@@ -88,49 +79,38 @@ public class TabInjectionHandler {
             accessor.setXpos(savedMouseX);
             accessor.setYpos(savedMouseY);
         }
-
         boolean isFirstTab = true;
         int xPos = ctx.guiLeft();
         int topPos = ctx.guiTop() - 28;
 
-        for (TabDefinition tab : ctx.tabs()) {
+        for (TabDefinition tab : ctx.tabs())
             if (tab.shouldShow(client)) {
                 boolean isSelected = tab.targetScreen().isAssignableFrom(screen.getClass());
                 int tabY = isSelected ? topPos - 2 : topPos;
-
-                event.addListener(new TabButtonWidget(xPos, tabY, isFirstTab, isSelected, tab, () -> handleTabClick(tab, client)));
-
+                event.addListener(new TabButtonWidget(xPos, tabY, isFirstTab, isSelected, tab,
+                        () -> handleTabClick(tab, client)));
                 xPos += 29;
                 isFirstTab = false;
             }
-        }
     }
 
     @SubscribeEvent
     public static void onScreenKeyPressed(ScreenEvent.KeyPressed.Pre event) {
         Screen screen = event.getScreen();
         Minecraft client = Minecraft.getInstance();
-
         ScreenTabContext ctx = resolveContext(screen);
         if (ctx == null) return;
-
         int keyCode = event.getKeyCode();
         int scanCode = event.getScanCode();
 
-        // Identificar en qué pestaña estamos actualmente
         TabDefinition currentTab = ctx.tabs().stream()
                 .filter(tab -> tab.targetScreen().isAssignableFrom(screen.getClass()))
                 .findFirst()
                 .orElse(null);
 
-        // 1. Tecla de inventario (E)
         if (client.options.keyInventory.matches(keyCode, scanCode)) {
             boolean alreadyHome = currentTab != null && currentTab.targetScreen() == ctx.parentClass();
-            if (alreadyHome) {
-                // Ya estamos en la home: dejamos que Vanilla la cierre de forma nativa.
-                return;
-            }
-
+            if (alreadyHome) return;
             if (currentTab != null && currentTab.canSwitchByKey()) {
                 TabDefinition homeTab = findHomeTab(ctx);
                 if (homeTab != null) {
@@ -139,30 +119,21 @@ public class TabInjectionHandler {
                     return;
                 }
             }
-
-            // Comportamiento seguro: solo cerrar.
             screen.onClose();
             event.setCanceled(true);
             return;
         }
-
-        // 2. Atajo dedicado de alguna pestaña del grupo (Ej. "K")
         for (TabDefinition tab : ctx.tabs()) {
             if (tab.keyMapping() == null || !tab.keyMapping().matches(keyCode, scanCode)) continue;
             if (!tab.shouldShow(client)) continue;
-
             boolean isSelected = tab == currentTab;
-
             if (isSelected) {
-                // Si la presionamos estando en su propia pantalla -> Cerrar
                 screen.onClose();
                 event.setCanceled(true);
             } else if (tab.canSwitchByKey()) {
-                // Si estamos en otra pantalla y permite cambio -> Cambiar de pestaña
                 handleTabClick(tab, client);
                 event.setCanceled(true);
             } else {
-                // Si no permite cambio, actúa como un botón genérico de cierre
                 screen.onClose();
                 event.setCanceled(true);
             }
@@ -184,11 +155,7 @@ public class TabInjectionHandler {
             savedMouseY = mc.mouseHandler.ypos();
             expectingTabChange = true;
         }
-
-        if (tab.screenSupplier() != null) {
-            mc.setScreen(tab.screenSupplier().get());
-        } else if (mc.player != null) {
-            mc.setScreen(new InventoryScreen(mc.player));
-        }
+        if (tab.screenSupplier() != null) mc.setScreen(tab.screenSupplier().get());
+        else if (mc.player != null) mc.setScreen(new InventoryScreen(mc.player));
     }
 }

@@ -30,9 +30,7 @@ public record TabDefinition(ResourceLocation id, ItemStack icon, Component toolt
         this(id, icon, tooltip, targetScreen, screenSupplier, priority, needsMouseFix, keyMapping, null);
     }
 
-    public boolean shouldShow(Minecraft client) {
-        return true;
-    }
+    public boolean shouldShow(Minecraft client) { return true; }
 
     public boolean canSwitchByKey() {
         return allowKeySwitch != null && allowKeySwitch.getAsBoolean();

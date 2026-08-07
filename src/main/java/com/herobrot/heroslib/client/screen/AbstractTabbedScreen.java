@@ -11,8 +11,4 @@ public abstract class AbstractTabbedScreen<T extends AbstractContainerMenu> exte
     public AbstractTabbedScreen(T menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
     }
-
-    // HerosLib Injection Handler detectará que esta clase hereda de AbstractContainerScreen
-    // y le inyectará automáticamente las pestañas en el evento Init.Post,
-    // por lo que no necesitas dibujarlas manualmente aquí.
 }

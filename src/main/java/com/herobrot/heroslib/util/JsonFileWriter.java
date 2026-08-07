@@ -22,9 +22,6 @@ import java.util.function.UnaryOperator;
 public class JsonFileWriter {
 
     private static final Gson PRETTY_GSON = new GsonBuilder().setPrettyPrinting().create();
-
-    // Un lock independiente por cada archivo (subFolder + fileName), no uno global,
-    // para no serializar escrituras de archivos distintos entre sí innecesariamente.
     private static final ConcurrentHashMap<String, Object> FILE_LOCKS = new ConcurrentHashMap<>();
 
     /**
@@ -61,16 +58,12 @@ public class JsonFileWriter {
                 if (file.exists()) {
                     try (FileReader reader = new FileReader(file)) {
                         JsonElement parsed = JsonParser.parseReader(reader);
-                        if (parsed.isJsonObject()) {
+                        if (parsed.isJsonObject())
                             current = parsed.getAsJsonObject();
-                        }
                     } catch (Exception e) {
-                        // FIX: ya no se ignora en silencio; si el JSON está corrupto, se avisa
-                        // antes de sobrescribirlo con un objeto vacío.
                         HerosLib.LOGGER.warn("[HerosLib]: No se pudo parsear {} existente, se reconstruirá. Detalle: {}", fileName, e.getMessage());
                     }
                 }
-
                 JsonObject updated = updater.apply(current);
                 writeInternal(updated, subFolder, fileName);
             }
@@ -80,11 +73,9 @@ public class JsonFileWriter {
     private static void writeInternal(JsonObject json, String subFolder, String fileName) {
         try {
             Path configDir = FMLPaths.CONFIGDIR.get().resolve(subFolder);
-            if (!Files.exists(configDir)) {
+            if (!Files.exists(configDir))
                 Files.createDirectories(configDir);
-            }
             File file = configDir.resolve(fileName).toFile();
-
             try (FileWriter writer = new FileWriter(file, false)) {
                 PRETTY_GSON.toJson(json, writer);
                 HerosLib.LOGGER.info("[HerosLib]: Archivo JSON actualizado en {}", file.getAbsolutePath());

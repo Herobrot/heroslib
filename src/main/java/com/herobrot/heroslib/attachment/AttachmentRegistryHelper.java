@@ -31,7 +31,6 @@ public class AttachmentRegistryHelper {
             Function<H, T> factory,
             boolean copyOnDeath
     ) {
-        // Llama a la función principal con un modificador vacío (identity)
         return registerNBTAttachment(register, name, holderType, factory, copyOnDeath, UnaryOperator.identity());
     }
 
@@ -47,14 +46,12 @@ public class AttachmentRegistryHelper {
             boolean copyOnDeath,
             UnaryOperator<AttachmentType.Builder<T>> customizer
     ) {
-        // Fábrica segura: Valida el tipo antes de hacer el cast
         Function<IAttachmentHolder, T> safeFactory = holder -> {
-            if (!holderType.isInstance(holder)) {
+            if (!holderType.isInstance(holder))
                 throw new IllegalStateException(
-                        "HerosLib: El Attachment '" + name + "' esperaba un holder de tipo " + holderType.getSimpleName()
+                        "[HerosLib]: El Attachment '" + name + "' esperaba un holder de tipo " + holderType.getSimpleName()
                                 + " pero recibio " + holder.getClass().getSimpleName()
                 );
-            }
             return factory.apply(holderType.cast(holder));
         };
 
@@ -75,12 +72,7 @@ public class AttachmentRegistryHelper {
                             return tag;
                         }
                     });
-
-            if (copyOnDeath) {
-                builder.copyOnDeath();
-            }
-
-            // Aplicamos cualquier personalización extra que el mod dependiente haya solicitado
+            if (copyOnDeath) builder.copyOnDeath();
             return customizer.apply(builder).build();
         });
     }

@@ -22,28 +22,17 @@ public class RegistryResolver {
      */
     public static <T> List<T> resolve(String identifier, Registry<T> registry, ResourceKey<? extends Registry<T>> registryKey) {
         if (identifier == null || identifier.isBlank()) return Collections.emptyList();
-
         List<T> result = new ArrayList<>();
-
         if (identifier.startsWith("#")) {
-            // Es un Tag
             ResourceLocation tagLocation = ResourceLocation.parse(identifier.substring(1));
             TagKey<T> tagKey = TagKey.create(registryKey, tagLocation);
-
-            // Extraemos todos los elementos que componen el Tag
             registry.getTag(tagKey).ifPresent(namedTag -> {
-                for (Holder<T> holder : namedTag) {
-                    result.add(holder.value());
-                }
+                for (Holder<T> holder : namedTag) result.add(holder.value());
             });
         } else {
-            // Es un ID directo
             ResourceLocation idLocation = ResourceLocation.parse(identifier);
-            if (registry.containsKey(idLocation)) {
-                result.add(registry.get(idLocation));
-            }
+            if (registry.containsKey(idLocation)) result.add(registry.get(idLocation));
         }
-
         return result;
     }
 }

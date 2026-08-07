@@ -20,8 +20,6 @@ import java.util.stream.Collectors;
 public class PayloadRegistryManager {
 
     private static final List<PayloadData<?>> PAYLOAD_QUEUE = new ArrayList<>();
-
-    // Bandera de seguridad para prevenir registros tardíos
     private static boolean registrationClosed = false;
 
     private record PayloadData<T extends CustomPacketPayload>(
@@ -77,34 +75,27 @@ public class PayloadRegistryManager {
 
     @SubscribeEvent
     public static void registerHandlers(final RegisterPayloadHandlersEvent event) {
-        // Cierra la puerta: cualquier intento de registro posterior lanzará excepción
         registrationClosed = true;
 
         Map<String, List<PayloadData<?>>> groupedByMod = PAYLOAD_QUEUE.stream()
                 .collect(Collectors.groupingBy(PayloadData::modId));
 
         groupedByMod.forEach((modId, dataList) -> {
-            // Asignamos la versión del protocolo basándonos en el primer paquete registrado por este mod
             String version = dataList.getFirst().protocolVersion();
             PayloadRegistrar registrar = event.registrar(modId).versioned(version);
-
-            for (PayloadData<?> data : dataList) {
+            for (PayloadData<?> data : dataList)
                 registerSafely(registrar, data);
-            }
         });
-
-        // Liberar memoria vaciando la cola
         PAYLOAD_QUEUE.clear();
     }
 
     private static <T extends CustomPacketPayload> void registerSafely(PayloadRegistrar registrar, PayloadData<T> data) {
-        if (data.clientHandler() != null && data.serverHandler() != null) {
+        if (data.clientHandler() != null && data.serverHandler() != null)
             registrar.playBidirectional(data.type(), data.codec(),
                     new DirectionalPayloadHandler<>(data.clientHandler(), data.serverHandler()));
-        } else if (data.clientHandler() != null) {
+        else if (data.clientHandler() != null)
             registrar.playToClient(data.type(), data.codec(), data.clientHandler());
-        } else if (data.serverHandler() != null) {
+        else if (data.serverHandler() != null)
             registrar.playToServer(data.type(), data.codec(), data.serverHandler());
-        }
     }
 }

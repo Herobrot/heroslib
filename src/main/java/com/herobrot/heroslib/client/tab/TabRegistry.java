@@ -10,11 +10,9 @@ import net.minecraft.world.item.Items;
 import java.util.*;
 
 public class TabRegistry {
-    // UNIFICACIÓN: Un solo mapa para todas las pestañas, agrupadas por su pantalla padre
     private static final Map<Class<? extends Screen>, List<TabDefinition>> TABS = new HashMap<>();
 
     static {
-        // La pestaña de vainilla se registra bajo la llave de InventoryScreen.class
         registerTab(InventoryScreen.class, new TabDefinition(
                 ResourceLocation.withDefaultNamespace("inventory"),
                 new ItemStack(Items.CHEST),

@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class HerosConfigManager {
-    // Almacena las acciones que cada mod quiere ejecutar cuando reciba su JSON
+
     private static final Map<String, Consumer<String>> CLIENT_HANDLERS = new HashMap<>();
 
     /**
@@ -20,8 +20,7 @@ public class HerosConfigManager {
      * Se ejecuta de forma segura en el Hilo Principal gracias al enqueueWork de HerosLib.java.
      */
     public static void handleClientSync(String modId, String jsonPayload) {
-        if (CLIENT_HANDLERS.containsKey(modId)) {
+        if (CLIENT_HANDLERS.containsKey(modId))
             CLIENT_HANDLERS.get(modId).accept(jsonPayload);
-        }
     }
 }

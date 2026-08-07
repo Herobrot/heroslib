@@ -29,24 +29,18 @@ public abstract class AbstractDataLoader extends SimpleJsonResourceReloadListene
     @Override
     protected void apply(@NotNull Map<ResourceLocation, JsonElement> objectMap, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profiler) {
         HerosLib.LOGGER.info("[HerosLib]: Cargando datos desde la carpeta de datapacks: {}", this.folderName);
-
-        // Limpiamos los mapas locales del mod antes de inyectar los nuevos datos
         this.clearLocalData();
-
         objectMap.forEach((id, element) -> {
             try {
                 if (element.isJsonObject()) {
                     JsonObject jsonObject = element.getAsJsonObject();
-
-                    // La lógica de si debe reemplazar (replace: true/false) o fusionar
-                    // se delega al mod dependiente, ya que varía por archivo.
                     this.processJson(id, jsonObject);
                 }
             } catch (Exception e) {
-                HerosLib.LOGGER.error("HerosLib: Error cargando el recurso {} en la carpeta {}. Detalle: {}", id, this.folderName, e.getMessage());
+                HerosLib.LOGGER.error("[HerosLib]: Error cargando el recurso {} en la carpeta {}. Detalle: {}",
+                        id, this.folderName, e.getMessage());
             }
         });
-
         this.onDataLoaded();
     }
 
