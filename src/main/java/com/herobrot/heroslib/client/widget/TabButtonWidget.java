@@ -10,19 +10,25 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class TabButtonWidget extends AbstractButton {
-    private static final ResourceLocation TAB_SELECTED = ResourceLocation.withDefaultNamespace
+    private static final ResourceLocation TAB_SELECTED_1 = ResourceLocation.withDefaultNamespace
             ("container/creative_inventory/tab_top_selected_1");
-    private static final ResourceLocation TAB_UNSELECTED = ResourceLocation.withDefaultNamespace
+    private static final ResourceLocation TAB_UNSELECTED_1 = ResourceLocation.withDefaultNamespace
             ("container/creative_inventory/tab_top_unselected_1");
+    private static final ResourceLocation TAB_SELECTED_2 = ResourceLocation.withDefaultNamespace
+            ("container/creative_inventory/tab_top_selected_2");
+    private static final ResourceLocation TAB_UNSELECTED_2 = ResourceLocation.withDefaultNamespace
+            ("container/creative_inventory/tab_top_unselected_2");
 
     private final ItemStack icon;
     private final boolean isSelected;
+    private final boolean isFirstTab;
     private final Runnable onPressAction;
 
     public TabButtonWidget(int x, int y, boolean isFirstTab, boolean isSelected, TabDefinition tab, Runnable onPressAction) {
         super(x, y, 28, 32, tab.tooltip());
         this.icon = tab.icon();
         this.isSelected = isSelected;
+        this.isFirstTab = isFirstTab;
         this.onPressAction = onPressAction;
     }
 
@@ -39,12 +45,22 @@ public class TabButtonWidget extends AbstractButton {
     }
 
     public void renderTabBackground(GuiGraphics graphics) {
-        ResourceLocation bgSprite = this.isSelected ? TAB_SELECTED : TAB_UNSELECTED;
+        ResourceLocation bgSprite;
+        if (this.isSelected) {
+            bgSprite = this.isFirstTab ? TAB_SELECTED_1 : TAB_SELECTED_2;
+        } else {
+            bgSprite = this.isFirstTab ? TAB_UNSELECTED_1 : TAB_UNSELECTED_2;
+        }
         graphics.blitSprite(bgSprite, this.getX(), this.getY(), this.width, this.height);
     }
 
-    public static void drawBackgroundStatic(GuiGraphics graphics, int x, int y, boolean selected) {
-        ResourceLocation bg = selected ? TAB_SELECTED : TAB_UNSELECTED;
+    public static void drawBackgroundStatic(GuiGraphics graphics, int x, int y, boolean isFirstTab, boolean selected) {
+        ResourceLocation bg;
+        if (selected) {
+            bg = isFirstTab ? TAB_SELECTED_1 : TAB_SELECTED_2;
+        } else {
+            bg = isFirstTab ? TAB_UNSELECTED_1 : TAB_UNSELECTED_2;
+        }
         graphics.blitSprite(bg, x, y, 28, 32);
     }
 

@@ -57,12 +57,15 @@ public class TabInjectionHandler {
         GuiGraphics graphics = event.getGuiGraphics();
         int xPos = ctx.guiLeft();
         int topPos = ctx.guiTop() - 28;
+        boolean isFirstTab = true;
+
         for (TabDefinition tab : ctx.tabs()) {
             if (!tab.shouldShow(Minecraft.getInstance())) continue;
             boolean isSelected = tab.targetScreen().isAssignableFrom(screen.getClass());
             if (!isSelected)
-                TabButtonWidget.drawBackgroundStatic(graphics, xPos, topPos, false);
+                TabButtonWidget.drawBackgroundStatic(graphics, xPos, topPos, isFirstTab, false);
             xPos += 29;
+            isFirstTab = false;
         }
     }
 
@@ -86,8 +89,7 @@ public class TabInjectionHandler {
         for (TabDefinition tab : ctx.tabs())
             if (tab.shouldShow(client)) {
                 boolean isSelected = tab.targetScreen().isAssignableFrom(screen.getClass());
-                int tabY = isSelected ? topPos - 2 : topPos;
-                event.addListener(new TabButtonWidget(xPos, tabY, isFirstTab, isSelected, tab,
+                event.addListener(new TabButtonWidget(xPos, topPos, isFirstTab, isSelected, tab,
                         () -> handleTabClick(tab, client)));
                 xPos += 29;
                 isFirstTab = false;
