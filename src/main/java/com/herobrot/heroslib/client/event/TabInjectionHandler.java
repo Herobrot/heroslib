@@ -64,7 +64,7 @@ public class TabInjectionHandler {
             boolean isSelected = tab.targetScreen().isAssignableFrom(screen.getClass());
             if (!isSelected)
                 TabButtonWidget.drawBackgroundStatic(graphics, xPos, topPos, isFirstTab, false);
-            xPos += 29;
+            xPos += 30;
             isFirstTab = false;
         }
     }
@@ -84,14 +84,15 @@ public class TabInjectionHandler {
         }
         boolean isFirstTab = true;
         int xPos = ctx.guiLeft();
-        int topPos = ctx.guiTop() - 28;
+        int topPos = ctx.guiTop() - 26;
 
         for (TabDefinition tab : ctx.tabs())
             if (tab.shouldShow(client)) {
                 boolean isSelected = tab.targetScreen().isAssignableFrom(screen.getClass());
-                event.addListener(new TabButtonWidget(xPos, topPos, isFirstTab, isSelected, tab,
+                int tabY = isSelected ? topPos - 2 : topPos;
+                event.addListener(new TabButtonWidget(xPos, tabY, isFirstTab, isSelected, tab,
                         () -> handleTabClick(tab, client)));
-                xPos += 29;
+                xPos += 30;
                 isFirstTab = false;
             }
     }

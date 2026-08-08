@@ -11,23 +11,25 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
-public record TabDefinition(ResourceLocation id, ItemStack icon, Component tooltip,
-                            Class<? extends Screen> targetScreen,
-                            Supplier<Screen> screenSupplier, int priority, boolean needsMouseFix,
-                            @Nullable KeyMapping keyMapping,
-                            @Nullable BooleanSupplier allowKeySwitch) {
+public record TabDefinition(
+        ResourceLocation id,
+        @Nullable ItemStack icon,
+        @Nullable ResourceLocation iconTexture,
+        @Nullable ResourceLocation bgSelected,
+        @Nullable ResourceLocation bgUnselected,
+        Component tooltip,
+        Class<? extends Screen> targetScreen,
+        Supplier<Screen> screenSupplier,
+        int priority,
+        boolean needsMouseFix,
+        @Nullable KeyMapping keyMapping,
+        @Nullable BooleanSupplier allowKeySwitch
+) {
 
     public TabDefinition(ResourceLocation id, ItemStack icon, Component tooltip,
                          Class<? extends Screen> targetScreen,
                          Supplier<Screen> screenSupplier, int priority, boolean needsMouseFix) {
-        this(id, icon, tooltip, targetScreen, screenSupplier, priority, needsMouseFix, null, null);
-    }
-
-    public TabDefinition(ResourceLocation id, ItemStack icon, Component tooltip,
-                         Class<? extends Screen> targetScreen,
-                         Supplier<Screen> screenSupplier, int priority, boolean needsMouseFix,
-                         @Nullable KeyMapping keyMapping) {
-        this(id, icon, tooltip, targetScreen, screenSupplier, priority, needsMouseFix, keyMapping, null);
+        this(id, icon, null, null, null, tooltip, targetScreen, screenSupplier, priority, needsMouseFix, null, null);
     }
 
     public boolean shouldShow(Minecraft client) { return true; }

@@ -19,6 +19,7 @@ public class TabButtonWidget extends AbstractButton {
     private static final ResourceLocation TAB_UNSELECTED_2 = ResourceLocation.withDefaultNamespace
             ("container/creative_inventory/tab_top_unselected_2");
 
+    private final TabDefinition tab;
     private final ItemStack icon;
     private final boolean isSelected;
     private final boolean isFirstTab;
@@ -26,6 +27,7 @@ public class TabButtonWidget extends AbstractButton {
 
     public TabButtonWidget(int x, int y, boolean isFirstTab, boolean isSelected, TabDefinition tab, Runnable onPressAction) {
         super(x, y, 28, 32, tab.tooltip());
+        this.tab = tab;
         this.icon = tab.icon();
         this.isSelected = isSelected;
         this.isFirstTab = isFirstTab;
@@ -35,7 +37,7 @@ public class TabButtonWidget extends AbstractButton {
     @Override
     public void renderWidget(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         if (this.isSelected) renderTabBackground(graphics);
-        graphics.renderFakeItem(this.icon, this.getX() + 6, this.getY() + 9);
+        renderIcon(graphics);
         if (this.isHovered()) {
             graphics.pose().pushPose();
             graphics.pose().translate(0, 0, 400);
@@ -44,8 +46,28 @@ public class TabButtonWidget extends AbstractButton {
         }
     }
 
+    private void renderIcon(GuiGraphics graphics) {
+        if (this.tab.iconTexture() != null) {
+            // El mod pasó una textura de ícono personalizada (se asume tamaño 16x16 en este ejemplo)
+            graphics.blit(this.tab.iconTexture(), this.getX() + 6, this.getY() + 9, 0, 0, 16, 16, 16, 16);
+        } else if (this.icon != null) {
+            graphics.renderFakeItem(this.icon, this.getX() + 6, this.getY() + 9);
+        }
+    }
+
     public void renderTabBackground(GuiGraphics graphics) {
         ResourceLocation bgSprite;
+
+        // Si el mod proveyó texturas propias para seleccionado/no seleccionado, las usamos
+        if (this.isSelected && this.tab.bgSelected() != null) {
+            graphics.blit(this.tab.bgSelected(), this.getX(), this.getY(), 0, 0, this.width, this.height, this.width, this.height);
+            return;
+        } else if (!this.isSelected && this.tab.bgUnselected() != null) {
+            graphics.blit(this.tab.bgUnselected(), this.getX(), this.getY(), 0, 0, this.width, this.height, this.width, this.height);
+            return;
+        }
+
+        // Lógica por defecto usando sprites nativos de Vanilla
         if (this.isSelected) {
             bgSprite = this.isFirstTab ? TAB_SELECTED_1 : TAB_SELECTED_2;
         } else {

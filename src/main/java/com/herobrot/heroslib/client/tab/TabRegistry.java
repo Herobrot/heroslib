@@ -1,32 +1,26 @@
 package com.herobrot.heroslib.client.tab;
 
+import com.herobrot.heroslib.HerosLib;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 
 import java.util.*;
 
 public class TabRegistry {
     private static final Map<Class<? extends Screen>, List<TabDefinition>> TABS = new HashMap<>();
 
-    static {
-        registerTab(InventoryScreen.class, new TabDefinition(
-                ResourceLocation.withDefaultNamespace("inventory"),
-                new ItemStack(Items.CHEST),
-                Component.translatable("gui.heroslib.tab.inventory"),
-                InventoryScreen.class,
-                null,
-                0,
-                false
-        ));
-    }
-
     public static void registerTab(Class<? extends Screen> parentClass, TabDefinition tab) {
-        TABS.computeIfAbsent(parentClass, k -> new ArrayList<>()).add(tab);
-        TABS.get(parentClass).sort(Comparator.comparingInt(TabDefinition::priority));
+        List<TabDefinition> tabs = TABS.computeIfAbsent(parentClass, k -> new ArrayList<>());
+        boolean conflict = tabs.stream().anyMatch(existingTab ->
+                existingTab.id().equals(tab.id()) && existingTab.targetScreen().equals(tab.targetScreen())
+        );
+        if (conflict) {
+            HerosLib.LOGGER.warn("[HerosLib]: Conflicto de pestaña detectada. La pestaña con ID '{}' para '{}' ya ha sido registrada por otro mod.",
+                    tab.id(), tab.targetScreen().getSimpleName());
+            return;
+        }
+        tabs.add(tab);
+        tabs.sort(Comparator.comparingInt(TabDefinition::priority));
     }
 
     public static void registerInventoryTab(TabDefinition tab) {
