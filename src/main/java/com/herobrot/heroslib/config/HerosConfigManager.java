@@ -9,8 +9,7 @@ public class HerosConfigManager {
     private static final Map<String, Consumer<String>> CLIENT_HANDLERS = new HashMap<>();
 
     /**
-     * Registra un manejador para el mod.
-     * ADVERTENCIA: Los mods deben llamar a este método SOLO desde su inicialización de Cliente (Dist.CLIENT).
+     * Registra un manejador para el mod (Dist.CLIENT).
      */
     public static void registerClientSync(String modId, Consumer<String> jsonConsumer) {
         CLIENT_HANDLERS.put(modId, jsonConsumer);

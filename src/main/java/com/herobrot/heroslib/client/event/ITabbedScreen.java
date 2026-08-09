@@ -11,7 +11,6 @@ public interface ITabbedScreen {
         return null;
     }
 
-    // Coordenadas base donde inicia tu interfaz gráfica
     int getGuiLeft();
     int getGuiTop();
 }

@@ -45,12 +45,12 @@ public abstract class AbstractDataLoader extends SimpleJsonResourceReloadListene
     }
 
     /**
-     * Se llama antes de procesar los JSONs. El mod dependiente debe vaciar sus Listas/Mapas aquí.
+     * Se llama antes de procesar los JSONs.
      */
     protected abstract void clearLocalData();
 
     /**
-     * Procesa un JSON individual. Aquí el mod aplica su lógica de "replace" y lectura de variables.
+     * Procesa un JSON individual.
      */
     protected abstract void processJson(ResourceLocation fileId, JsonObject data);
 

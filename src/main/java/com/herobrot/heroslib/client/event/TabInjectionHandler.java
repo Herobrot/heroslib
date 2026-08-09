@@ -95,7 +95,6 @@ public class TabInjectionHandler {
         boolean isFirstTab = true;
         int xPos = ctx.guiLeft();
         int topPos = ctx.guiTop() - 26;
-
         for (TabDefinition tab : ctx.tabs())
             if (tab.shouldShow(client)) {
                 boolean isSelected = tab.targetScreen().isAssignableFrom(screen.getClass());

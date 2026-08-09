@@ -7,7 +7,6 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
-// Paquete genérico. El modId indica a qué mod pertenece esta configuración.
 public record GenericConfigSyncPayload(String modId, String jsonConfig) implements CustomPacketPayload {
 
     public static final Type<GenericConfigSyncPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("heroslib", "generic_config_sync"));
