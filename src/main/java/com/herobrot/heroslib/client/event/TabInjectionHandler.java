@@ -158,7 +158,6 @@ public class TabInjectionHandler {
             savedMouseY = mc.mouseHandler.ypos();
             expectingTabChange = true;
         }
-        if (tab.screenSupplier() != null) mc.setScreen(tab.screenSupplier().get());
-        else if (mc.player != null) mc.setScreen(new InventoryScreen(mc.player));
+        tab.onTabClick().run();
     }
 }

@@ -24,7 +24,7 @@ public class PayloadRegistryManager {
 
     private record PayloadData<T extends CustomPacketPayload>(
             String modId,
-            String protocolVersion, // Versión dinámica por mod
+            String protocolVersion,
             CustomPacketPayload.Type<T> type,
             StreamCodec<? super RegistryFriendlyByteBuf, T> codec,
             @Nullable IPayloadHandler<T> clientHandler,

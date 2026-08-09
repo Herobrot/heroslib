@@ -19,17 +19,26 @@ public record TabDefinition(
         @Nullable ResourceLocation bgUnselected,
         Component tooltip,
         Class<? extends Screen> targetScreen,
-        Supplier<Screen> screenSupplier,
+        Runnable onTabClick,
         int priority,
         boolean needsMouseFix,
         @Nullable KeyMapping keyMapping,
         @Nullable BooleanSupplier allowKeySwitch
 ) {
 
+    /**
+     * Constructor para pestañas PURAMENTE DE CLIENTE.
+     * Define explícitamente que no depende del servidor.
+     */
     public TabDefinition(ResourceLocation id, ItemStack icon, Component tooltip,
                          Class<? extends Screen> targetScreen,
                          Supplier<Screen> screenSupplier, int priority, boolean needsMouseFix) {
-        this(id, icon, null, null, null, tooltip, targetScreen, screenSupplier, priority, needsMouseFix, null, null);
+        this(id, icon, null, null, null, tooltip, targetScreen,
+                () -> {
+                    Minecraft mc = Minecraft.getInstance();
+                    if (mc.player != null) mc.setScreen(screenSupplier.get());
+                },
+                priority, needsMouseFix, null, null);
     }
 
     public boolean shouldShow(Minecraft client) { return true; }
