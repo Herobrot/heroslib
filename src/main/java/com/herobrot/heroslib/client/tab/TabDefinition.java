@@ -26,19 +26,37 @@ public record TabDefinition(
         @Nullable BooleanSupplier allowKeySwitch
 ) {
 
-    /**
-     * Constructor para pestañas PURAMENTE DE CLIENTE.
-     * Define explícitamente que no depende del servidor.
-     */
+    // Cliente
     public TabDefinition(ResourceLocation id, ItemStack icon, Component tooltip,
                          Class<? extends Screen> targetScreen,
                          Supplier<Screen> screenSupplier, int priority, boolean needsMouseFix) {
         this(id, icon, null, null, null, tooltip, targetScreen,
-                () -> {
-                    Minecraft mc = Minecraft.getInstance();
-                    if (mc.player != null) mc.setScreen(screenSupplier.get());
-                },
-                priority, needsMouseFix, null, null);
+                wrapSupplier(screenSupplier), priority, needsMouseFix, null, null);
+    }
+
+    // Cliente + Atajo de teclado
+    public TabDefinition(ResourceLocation id, ItemStack icon, Component tooltip,
+                         Class<? extends Screen> targetScreen,
+                         Supplier<Screen> screenSupplier, int priority, boolean needsMouseFix,
+                         @Nullable KeyMapping keyMapping) {
+        this(id, icon, null, null, null, tooltip, targetScreen,
+                wrapSupplier(screenSupplier), priority, needsMouseFix, keyMapping, null);
+    }
+
+    // Cliente + Atajo de teclado + Lógica de intercambio
+    public TabDefinition(ResourceLocation id, ItemStack icon, Component tooltip,
+                         Class<? extends Screen> targetScreen,
+                         Supplier<Screen> screenSupplier, int priority, boolean needsMouseFix,
+                         @Nullable KeyMapping keyMapping, @Nullable BooleanSupplier allowKeySwitch) {
+        this(id, icon, null, null, null, tooltip, targetScreen,
+                wrapSupplier(screenSupplier), priority, needsMouseFix, keyMapping, allowKeySwitch);
+    }
+
+    private static Runnable wrapSupplier(Supplier<Screen> screenSupplier) {
+        return () -> {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.player != null) mc.setScreen(screenSupplier.get());
+        };
     }
 
     public boolean shouldShow(Minecraft client) { return true; }
