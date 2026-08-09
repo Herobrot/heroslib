@@ -18,6 +18,7 @@ sourceSets.main.resources {
 }
 repositories {
     maven { url = "https://maven.shedaniel.me/" }
+    maven { url = "https://repo.sleeping.town/" }
 }
 base {
     archivesName = mod_id
@@ -69,8 +70,9 @@ configurations {
 dependencies {
     implementation("me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}")
     //Compile
-
+    compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
     //Test
+    //runtimeOnly "dev.emi:emi-neoforge:${emi_version}"
 }
 tasks.named('processResources', ProcessResources) {
     var replaceProperties = [
