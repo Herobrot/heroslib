@@ -93,4 +93,6 @@ public class TabButtonWidget extends AbstractButton {
 
     @Override
     protected void updateWidgetNarration(@NotNull NarrationElementOutput narration) {}
+
+    public TabDefinition getTab() { return this.tab; }
 }
