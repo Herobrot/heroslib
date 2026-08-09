@@ -72,7 +72,7 @@ dependencies {
     //Compile
     compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
     //Test
-    //runtimeOnly "dev.emi:emi-neoforge:${emi_version}"
+    runtimeOnly "dev.emi:emi-neoforge:${emi_version}"
 }
 tasks.named('processResources', ProcessResources) {
     var replaceProperties = [
@@ -138,8 +138,8 @@ publishMods {
         client = true
         server = true
         requires("cloth-config")
-        changelogType = "html"
-        displayName = jar.archiveFileName.get()
+        changelogType = "markdown"
+        displayName = "${jar.archiveFileName.get()}+${minecraft_version}"
     }
     modrinth {
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
@@ -147,6 +147,7 @@ publishMods {
         minecraftVersions.add(minecraft_version)
         requires("cloth-config")
         environment=CLIENT_AND_SERVER
+        version = "${mod_version}+${minecraft_version}"
     }
     github {
         accessToken = providers.environmentVariable("GITHUB_TOKEN")
