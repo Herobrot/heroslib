@@ -8,7 +8,7 @@ plugins {
 tasks.named('wrapper', Wrapper).configure {
     distributionType = Wrapper.DistributionType.BIN
 }
-version = mod_version
+version = "${mod_version}+${minecraft_version}"
 group = mod_group_id
 
 sourceSets.main.resources {
@@ -53,8 +53,8 @@ neoForge {
             programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
         }
         configureEach {
-            systemProperty 'forge.logging.markers', 'REGISTRIES'
             logLevel = org.slf4j.event.Level.DEBUG
+            systemProperty 'neoforge.logging.markers', 'REGISTRIES'
         }
     }
 
@@ -139,7 +139,7 @@ publishMods {
         server = true
         requires("cloth-config")
         changelogType = "markdown"
-        displayName = "${jar.archiveFileName.get()}+${minecraft_version}"
+        displayName = jar.archiveFileName.get()
     }
     modrinth {
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
@@ -152,9 +152,9 @@ publishMods {
     github {
         accessToken = providers.environmentVariable("GITHUB_TOKEN")
         repository = "Herobrot/${mod_id}"
+        tagName="${mod_version}+${minecraft_version}"
+        displayName = "${mod_name} ${mod_version}+${minecraft_version}"
         commitish = "1.21"
         additionalFiles.from(tasks.named("sourcesJar"))
-        displayName = "${mod_name} ${mod_version}+${minecraft_version}"
-        tagName="${mod_version}+${minecraft_version}"
     }
 }

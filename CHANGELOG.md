@@ -1,3 +1,12 @@
+# 1.1.1
+## Added:
+- Constructors tabs for textures
+## Fixed:
+- &nbsp;
+## Changed
+- &nbsp;
+---
+# 1.1.0
 ## Added:
 - EMI Compat plugin
   - Adds a dynamic exclusion region to the tabs
