@@ -25,7 +25,7 @@ public record TabDefinition(
         @Nullable KeyMapping keyMapping,
         @Nullable BooleanSupplier allowKeySwitch
 ) {
-
+    // --- Constructores para iconos de Items ---
     // Cliente
     public TabDefinition(ResourceLocation id, ItemStack icon, Component tooltip,
                          Class<? extends Screen> targetScreen,
@@ -49,6 +49,33 @@ public record TabDefinition(
                          Supplier<Screen> screenSupplier, int priority, boolean needsMouseFix,
                          @Nullable KeyMapping keyMapping, @Nullable BooleanSupplier allowKeySwitch) {
         this(id, icon, null, null, null, tooltip, targetScreen,
+                wrapSupplier(screenSupplier), priority, needsMouseFix, keyMapping, allowKeySwitch);
+    }
+
+    // --- Constructores para iconos de texturas ---
+    // Cliente
+    public TabDefinition(ResourceLocation id, ResourceLocation iconTexture, Component tooltip,
+                         Class<? extends Screen> targetScreen,
+                         Supplier<Screen> screenSupplier, int priority, boolean needsMouseFix) {
+        this(id, null, iconTexture, null, null, tooltip, targetScreen,
+                wrapSupplier(screenSupplier), priority, needsMouseFix, null, null);
+    }
+
+    // Cliente + Atajo de teclado
+    public TabDefinition(ResourceLocation id, ResourceLocation iconTexture, Component tooltip,
+                         Class<? extends Screen> targetScreen,
+                         Supplier<Screen> screenSupplier, int priority, boolean needsMouseFix,
+                         @Nullable KeyMapping keyMapping) {
+        this(id, null, iconTexture, null, null, tooltip, targetScreen,
+                wrapSupplier(screenSupplier), priority, needsMouseFix, keyMapping, null);
+    }
+
+    // Cliente + Atajo de teclado + Lógica de intercambio
+    public TabDefinition(ResourceLocation id, ResourceLocation iconTexture, Component tooltip,
+                         Class<? extends Screen> targetScreen,
+                         Supplier<Screen> screenSupplier, int priority, boolean needsMouseFix,
+                         @Nullable KeyMapping keyMapping, @Nullable BooleanSupplier allowKeySwitch) {
+        this(id, null, iconTexture, null, null, tooltip, targetScreen,
                 wrapSupplier(screenSupplier), priority, needsMouseFix, keyMapping, allowKeySwitch);
     }
 
