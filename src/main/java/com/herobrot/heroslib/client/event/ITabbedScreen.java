@@ -7,10 +7,8 @@ public interface ITabbedScreen {
      * Devuelve la clase de la pantalla padre para agrupar las pestañas.
      * Ejemplo: return InventoryScreen.class;
      */
-    default Class<? extends Screen> getParentScreenClass() {
-        return null;
-    }
+    default Class<? extends Screen> heroslib$getParentScreenClass() { return null; }
 
-    int getGuiLeft();
-    int getGuiTop();
+    int heroslib$getGuiLeft();
+    int heroslib$getGuiTop();
 }

@@ -24,10 +24,10 @@ public class HerosEmiPlugin implements EmiPlugin {
                 guiTop = inv.getGuiTop();
                 tabCount = TabRegistry.getTabsFor(InventoryScreen.class).size();
             } else if (screen instanceof ITabbedScreen tabbed) {
-                Class<? extends Screen> parentClass = tabbed.getParentScreenClass();
+                Class<? extends Screen> parentClass = tabbed.heroslib$getParentScreenClass();
                 if (parentClass != null) {
-                    guiLeft = tabbed.getGuiLeft();
-                    guiTop = tabbed.getGuiTop();
+                    guiLeft = tabbed.heroslib$getGuiLeft();
+                    guiTop = tabbed.heroslib$getGuiTop();
                     tabCount = TabRegistry.getTabsFor(parentClass).size();
                 }
             }

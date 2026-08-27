@@ -38,9 +38,9 @@ public class TabInjectionHandler {
             guiTop = containerScreen.getGuiTop();
             parentClass = InventoryScreen.class;
         } else if (screen instanceof ITabbedScreen tabbedScreen) {
-            guiLeft = tabbedScreen.getGuiLeft();
-            guiTop = tabbedScreen.getGuiTop();
-            parentClass = tabbedScreen.getParentScreenClass();
+            guiLeft = tabbedScreen.heroslib$getGuiLeft();
+            guiTop = tabbedScreen.heroslib$getGuiTop();
+            parentClass = tabbedScreen.heroslib$getParentScreenClass();
             if (parentClass == null) return null;
         } else
             return null;
@@ -64,9 +64,8 @@ public class TabInjectionHandler {
             boolean isSelected = tab.targetScreen().isAssignableFrom(screen.getClass());
             int tabY = isSelected ? topPos - 2 : topPos;
 
-            if (!isSelected) {
+            if (!isSelected)
                 TabButtonWidget.drawBackgroundStatic(graphics, xPos, topPos, isFirstTab, false);
-            }
 
             int finalXPos = xPos;
             screen.children().stream()
