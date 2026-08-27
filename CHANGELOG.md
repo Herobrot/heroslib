@@ -1,3 +1,10 @@
+# 1.1.2
+## Added:
+- Builder pattern for TabDefinition
+## Fixed:
+- &nbsp;
+## Changed
+- The constructors were removed, gone, reduced to atoms.
 # 1.1.1
 ## Added:
 - Constructors tabs for textures
