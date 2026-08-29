@@ -1,3 +1,11 @@
+# 1.2.0
+## Added:
+- Created an API
+- Added compat for LegendaryTabs
+## Fixed:
+- Tabs from LegendaryTabs overlaping HerosLib's Tabs
+## Changed
+- &nbsp;
 # 1.1.2
 ## Added:
 - Builder pattern for TabDefinition
@@ -5,6 +13,7 @@
 - &nbsp;
 ## Changed
 - The constructors were removed, gone, reduced to atoms.
+---
 # 1.1.1
 ## Added:
 - Constructors tabs for textures
