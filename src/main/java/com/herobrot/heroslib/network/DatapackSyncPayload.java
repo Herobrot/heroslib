@@ -1,5 +1,6 @@
 package com.herobrot.heroslib.network;
 
+import com.herobrot.heroslib.HerosLib;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -11,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 public record DatapackSyncPayload(String modId, String packetIdentifier, String jsonPayload) implements CustomPacketPayload {
 
     public static final Type<DatapackSyncPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath
-            ("heroslib", "datapack_sync"));
+            (HerosLib.MODID, "datapack_sync"));
 
     public static final StreamCodec<FriendlyByteBuf, DatapackSyncPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.stringUtf8(256), DatapackSyncPayload::modId,

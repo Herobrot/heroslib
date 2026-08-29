@@ -1,5 +1,6 @@
 package com.herobrot.heroslib.network;
 
+import com.herobrot.heroslib.HerosLib;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -16,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@EventBusSubscriber(modid = "heroslib")
+@EventBusSubscriber(modid = HerosLib.MODID)
 public class PayloadRegistryManager {
 
     private static final List<PayloadData<?>> PAYLOAD_QUEUE = new ArrayList<>();
