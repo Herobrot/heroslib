@@ -1,5 +1,6 @@
 package com.herobrot.heroslib.client.widget;
 
+import com.herobrot.heroslib.api.HerosLibAPI;
 import com.herobrot.heroslib.client.tab.TabDefinition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -26,7 +27,7 @@ public class TabButtonWidget extends AbstractButton {
     private final Runnable onPressAction;
 
     public TabButtonWidget(int x, int y, boolean isFirstTab, boolean isSelected, TabDefinition tab, Runnable onPressAction) {
-        super(x, y, 28, 32, tab.tooltip());
+        super(x, y, 28, HerosLibAPI.TAB_HEIGHT, tab.tooltip());
         this.tab = tab;
         this.icon = tab.icon();
         this.isSelected = isSelected;
@@ -80,7 +81,7 @@ public class TabButtonWidget extends AbstractButton {
             bg = isFirstTab ? TAB_SELECTED_1 : TAB_SELECTED_2;
         else
             bg = isFirstTab ? TAB_UNSELECTED_1 : TAB_UNSELECTED_2;
-        graphics.blitSprite(bg, x, y, 28, 32);
+        graphics.blitSprite(bg, x, y, 28, HerosLibAPI.TAB_HEIGHT);
     }
 
     @Override

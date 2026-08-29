@@ -1,6 +1,7 @@
 package com.herobrot.heroslib.client.event;
 
 import com.herobrot.heroslib.HerosLib;
+import com.herobrot.heroslib.api.HerosLibAPI;
 import com.herobrot.heroslib.client.tab.TabDefinition;
 import com.herobrot.heroslib.client.tab.TabRegistry;
 import com.herobrot.heroslib.client.widget.TabButtonWidget;
@@ -10,7 +11,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -31,29 +31,18 @@ public class TabInjectionHandler {
 
     private static ScreenTabContext resolveContext(Screen screen) {
         if (screen instanceof CreativeModeInventoryScreen) return null;
-        int guiLeft;
-        int guiTop;
-        Class<? extends Screen> parentClass;
-
-        if (screen instanceof InventoryScreen containerScreen) {
-            guiLeft = containerScreen.getGuiLeft();
-            guiTop = containerScreen.getGuiTop();
-            parentClass = InventoryScreen.class;
-        } else if (screen instanceof ITabbedScreen tabbedScreen) {
-            guiLeft = tabbedScreen.heroslib$getGuiLeft();
-            guiTop = tabbedScreen.heroslib$getGuiTop();
-            parentClass = tabbedScreen.heroslib$getParentScreenClass();
-            if (parentClass == null) return null;
-        } else
-            return null;
-
+        Class<? extends Screen> parentClass = HerosLibAPI.resolveParentClass(screen);
+        if (parentClass == null) return null;
         List<TabDefinition> tabs = TabRegistry.getTabsFor(parentClass);
-        return tabs.isEmpty() ? null : new ScreenTabContext(guiLeft, guiTop, parentClass, tabs);
+        if (tabs.isEmpty()) return null;
+        return new ScreenTabContext(
+                HerosLibAPI.getGuiLeft(screen),
+                HerosLibAPI.getGuiTop(screen),
+                parentClass,
+                tabs
+        );
     }
 
-    /**
-     * Calcula cuánto debemos desplazarnos a la derecha si LegendaryTabs está activo en esta pantalla.
-     */
     private static int getLegendaryTabsOffset(Class<?> parentClass) {
         if (!HerosLib.isLegendaryTabsLoaded) return 0;
         try {
@@ -80,26 +69,28 @@ public class TabInjectionHandler {
         ScreenTabContext ctx = resolveContext(screen);
         if (ctx == null) return;
         GuiGraphics graphics = event.getGuiGraphics();
+        Minecraft client = Minecraft.getInstance();
+
         int offset = getLegendaryTabsOffset(ctx.parentClass());
         boolean skipHomeTab = shouldSkipHomeTab(ctx.parentClass());
         int xPos = ctx.guiLeft() + offset;
         int topPos = ctx.guiTop() - 26;
         boolean isFirstTab = offset == 0;
+
         for (TabDefinition tab : ctx.tabs()) {
-            if (!tab.shouldShow(Minecraft.getInstance())) continue;
+            if (!tab.shouldShow(client)) continue;
             if (skipHomeTab && tab.targetScreen() == ctx.parentClass()) continue;
             boolean isSelected = tab.targetScreen().isAssignableFrom(screen.getClass());
             int tabY = isSelected ? topPos - 2 : topPos;
             if (!isSelected)
                 TabButtonWidget.drawBackgroundStatic(graphics, xPos, topPos, isFirstTab, false);
-
             int finalXPos = xPos;
             screen.children().stream()
                     .filter(child -> child instanceof TabButtonWidget btn && btn.getTab() == tab)
                     .findFirst()
                     .ifPresent(btn -> ((TabButtonWidget) btn).setPosition(finalXPos, tabY));
 
-            xPos += 30;
+            xPos += HerosLibAPI.TAB_WIDTH;
             isFirstTab = false;
         }
     }
@@ -117,11 +108,13 @@ public class TabInjectionHandler {
             accessor.setXpos(savedMouseX);
             accessor.setYpos(savedMouseY);
         }
+
         int offset = getLegendaryTabsOffset(ctx.parentClass());
         boolean skipHomeTab = shouldSkipHomeTab(ctx.parentClass());
         int xPos = ctx.guiLeft() + offset;
         int topPos = ctx.guiTop() - 26;
         boolean isFirstTab = offset == 0;
+
         for (TabDefinition tab : ctx.tabs()) {
             if (!tab.shouldShow(client)) continue;
             if (skipHomeTab && tab.targetScreen() == ctx.parentClass()) continue;
@@ -129,7 +122,7 @@ public class TabInjectionHandler {
             int tabY = isSelected ? topPos - 2 : topPos;
             event.addListener(new TabButtonWidget(xPos, tabY, isFirstTab, isSelected, tab,
                     () -> handleTabClick(tab, client)));
-            xPos += 30;
+            xPos += HerosLibAPI.TAB_WIDTH;
             isFirstTab = false;
         }
     }
@@ -163,6 +156,7 @@ public class TabInjectionHandler {
             event.setCanceled(true);
             return;
         }
+
         for (TabDefinition tab : ctx.tabs()) {
             if (tab.keyMapping() == null || !tab.keyMapping().matches(keyCode, scanCode)) continue;
             if (!tab.shouldShow(client)) continue;
