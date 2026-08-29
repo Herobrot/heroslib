@@ -1,8 +1,10 @@
 package com.herobrot.heroslib.client.event;
 
+import com.herobrot.heroslib.HerosLib;
 import com.herobrot.heroslib.client.tab.TabDefinition;
 import com.herobrot.heroslib.client.tab.TabRegistry;
 import com.herobrot.heroslib.client.widget.TabButtonWidget;
+import com.herobrot.heroslib.compat.LegendaryTabsCompat;
 import com.herobrot.heroslib.mixin.MouseHandlerAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -18,7 +20,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 
-@EventBusSubscriber(modid = "heroslib", value = Dist.CLIENT)
+@EventBusSubscriber(modid = HerosLib.MODID, value = Dist.CLIENT)
 public class TabInjectionHandler {
     private static boolean expectingTabChange = false;
     private static double savedMouseX = 0;
@@ -49,21 +51,45 @@ public class TabInjectionHandler {
         return tabs.isEmpty() ? null : new ScreenTabContext(guiLeft, guiTop, parentClass, tabs);
     }
 
+    /**
+     * Calcula cuánto debemos desplazarnos a la derecha si LegendaryTabs está activo en esta pantalla.
+     */
+    private static int getLegendaryTabsOffset(Class<?> parentClass) {
+        if (!HerosLib.isLegendaryTabsLoaded) return 0;
+        try {
+            return LegendaryTabsCompat.getActiveTabBarWidth(parentClass);
+        } catch (Throwable e) {
+            HerosLib.LOGGER.error("[HerosLib]: Error al calcular el offset de LegendaryTabs", e);
+            return 0;
+        }
+    }
+
+    private static boolean shouldSkipHomeTab(Class<?> parentClass) {
+        if (!HerosLib.isLegendaryTabsLoaded) return false;
+        try {
+            return LegendaryTabsCompat.isInventoryTabActive(parentClass);
+        } catch (Throwable e) {
+            HerosLib.LOGGER.error("[HerosLib]: Error al comprobar la pestaña de inventario de LegendaryTabs", e);
+            return false;
+        }
+    }
+
     @SubscribeEvent
     public static void onScreenRenderPre(ScreenEvent.Render.Pre event) {
         Screen screen = event.getScreen();
         ScreenTabContext ctx = resolveContext(screen);
         if (ctx == null) return;
         GuiGraphics graphics = event.getGuiGraphics();
-        int xPos = ctx.guiLeft();
+        int offset = getLegendaryTabsOffset(ctx.parentClass());
+        boolean skipHomeTab = shouldSkipHomeTab(ctx.parentClass());
+        int xPos = ctx.guiLeft() + offset;
         int topPos = ctx.guiTop() - 26;
-        boolean isFirstTab = true;
-
+        boolean isFirstTab = offset == 0;
         for (TabDefinition tab : ctx.tabs()) {
             if (!tab.shouldShow(Minecraft.getInstance())) continue;
+            if (skipHomeTab && tab.targetScreen() == ctx.parentClass()) continue;
             boolean isSelected = tab.targetScreen().isAssignableFrom(screen.getClass());
             int tabY = isSelected ? topPos - 2 : topPos;
-
             if (!isSelected)
                 TabButtonWidget.drawBackgroundStatic(graphics, xPos, topPos, isFirstTab, false);
 
@@ -91,18 +117,21 @@ public class TabInjectionHandler {
             accessor.setXpos(savedMouseX);
             accessor.setYpos(savedMouseY);
         }
-        boolean isFirstTab = true;
-        int xPos = ctx.guiLeft();
+        int offset = getLegendaryTabsOffset(ctx.parentClass());
+        boolean skipHomeTab = shouldSkipHomeTab(ctx.parentClass());
+        int xPos = ctx.guiLeft() + offset;
         int topPos = ctx.guiTop() - 26;
-        for (TabDefinition tab : ctx.tabs())
-            if (tab.shouldShow(client)) {
-                boolean isSelected = tab.targetScreen().isAssignableFrom(screen.getClass());
-                int tabY = isSelected ? topPos - 2 : topPos;
-                event.addListener(new TabButtonWidget(xPos, tabY, isFirstTab, isSelected, tab,
-                        () -> handleTabClick(tab, client)));
-                xPos += 30;
-                isFirstTab = false;
-            }
+        boolean isFirstTab = offset == 0;
+        for (TabDefinition tab : ctx.tabs()) {
+            if (!tab.shouldShow(client)) continue;
+            if (skipHomeTab && tab.targetScreen() == ctx.parentClass()) continue;
+            boolean isSelected = tab.targetScreen().isAssignableFrom(screen.getClass());
+            int tabY = isSelected ? topPos - 2 : topPos;
+            event.addListener(new TabButtonWidget(xPos, tabY, isFirstTab, isSelected, tab,
+                    () -> handleTabClick(tab, client)));
+            xPos += 30;
+            isFirstTab = false;
+        }
     }
 
     @SubscribeEvent

@@ -5,6 +5,8 @@ import net.neoforged.fml.ModList;
 
 public class ModUtils {
 
+    private ModUtils() {}
+
     /**
      * Obtiene la versión actual de un mod registrada en su archivo toml/gradle de forma segura.
      *
@@ -18,5 +20,15 @@ public class ModUtils {
                     HerosLib.LOGGER.warn("[HerosLib]: No se encontró el mod '{}' al resolver su version; usando fallback '1.0.0'.", modId);
                     return "1.0.0";
                 });
+    }
+
+    /**
+     * Retorna el estado de un mod si está registrado o no
+     *
+     * @param modId El ID del mod a consultar.
+     * @return Booleano si esta registrado o no
+     */
+    public static boolean isModLoaded(String modId) {
+        return ModList.get().isLoaded(modId);
     }
 }

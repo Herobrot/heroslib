@@ -17,8 +17,11 @@ public class HerosLib {
     public static final String MODID = "heroslib";
     public static final Logger LOGGER = LoggerFactory.getLogger(MODID);
 
+    public static boolean isLegendaryTabsLoaded = false;
+
     @SuppressWarnings("unused")
     public HerosLib(IEventBus modEventBus, ModContainer modContainer) {
+        verifyingModsInstalled();
         PayloadRegistryManager.registerBidirectional(
                 MODID,
                 ModUtils.getModVersion(MODID),
@@ -31,5 +34,9 @@ public class HerosLib {
                         player.sendSystemMessage(Component.translatable("message.heroslib.config_sync_unsupported"));
                 })
         );
+    }
+
+    private void verifyingModsInstalled() {
+        isLegendaryTabsLoaded = ModUtils.isModLoaded("legendarytabs");
     }
 }

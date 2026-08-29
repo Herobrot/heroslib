@@ -19,6 +19,9 @@ sourceSets.main.resources {
 repositories {
     maven { url = "https://maven.shedaniel.me/" }
     maven { url = "https://repo.sleeping.town/" }
+    flatDir(
+            dirs: 'libs'
+    )
 }
 base {
     archivesName = mod_id
@@ -71,6 +74,7 @@ dependencies {
     implementation("me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}")
     //Compile
     compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
+    compileOnly "sfiomn.legendarytabs:legendarytabs:${legendarytabs_version}"
     //Test
     runtimeOnly "dev.emi:emi-neoforge:${emi_version}"
 }
