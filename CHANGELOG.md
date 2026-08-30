@@ -1,3 +1,11 @@
+# 1.2.1
+## Added:
+- &nbsp;
+## Fixed:
+- Fixed a bad version range, crashing when having LegendaryTabs
+## Changed
+- &nbsp;
+---
 # 1.2.0
 ## Added:
 - Created an API
@@ -6,6 +14,7 @@
 - Tabs from LegendaryTabs overlaping HerosLib's Tabs
 ## Changed
 - &nbsp;
+---
 # 1.1.2
 ## Added:
 - Builder pattern for TabDefinition
